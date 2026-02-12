@@ -63,9 +63,50 @@ resource "aws_instance" "this" {
   vpc_security_group_ids      = [aws_security_group.this.id]
   associate_public_ip_address = true
 
+  instance_market_options {
+    market_type = "spot"
+    spot_options {
+      instance_interruption_behavior = "stop"
+      spot_instance_type             = "persistent"
+    }
+  }
+
   root_block_device {
     volume_type           = "gp3"
     volume_size           = 20
     delete_on_termination = true
   }
+
+  user_data = var.auto_shutdown_idle_minutes > 0 ? <<-EOF
+    #!/bin/bash
+
+    cat > /usr/local/bin/auto-shutdown.sh << 'SCRIPT'
+    #!/bin/bash
+    IDLE_FILE="/tmp/idle-minutes"
+    THRESHOLD_MINUTES=$${IDLE_THRESHOLD:-240}
+    CPU_THRESHOLD=$${CPU_THRESHOLD:-5}
+
+    [ ! -f "$IDLE_FILE" ] && echo 0 > "$IDLE_FILE"
+
+    SSH_USERS=$(who | wc -l)
+    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}' | cut -d. -f1)
+
+    if [ "$SSH_USERS" -eq 0 ] && [ "$CPU_USAGE" -lt "$CPU_THRESHOLD" ]; then
+      CURRENT=$(cat "$IDLE_FILE")
+      CURRENT=$((CURRENT + 1))
+      echo "$CURRENT" > "$IDLE_FILE"
+      if [ "$CURRENT" -ge "$THRESHOLD_MINUTES" ]; then
+        shutdown -h now
+      fi
+    else
+      echo 0 > "$IDLE_FILE"
+    fi
+    SCRIPT
+
+    chmod +x /usr/local/bin/auto-shutdown.sh
+
+    echo "* * * * * root IDLE_THRESHOLD=${var.auto_shutdown_idle_minutes} CPU_THRESHOLD=${var.auto_shutdown_cpu_threshold} /usr/local/bin/auto-shutdown.sh" > /etc/cron.d/auto-shutdown
+    chmod 644 /etc/cron.d/auto-shutdown
+  EOF
+  : null
 }

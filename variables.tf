@@ -19,3 +19,15 @@ variable "instance_type" {
   type        = string
   default     = "t3.medium"
 }
+
+variable "auto_shutdown_idle_minutes" {
+  description = "Minutes of inactivity before auto-shutdown (0 to disable)"
+  type        = number
+  default     = 240
+}
+
+variable "auto_shutdown_cpu_threshold" {
+  description = "CPU usage percentage below which the instance is considered idle"
+  type        = number
+  default     = 5
+}
