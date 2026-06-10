@@ -22,7 +22,7 @@ resource "aws_key_pair" "this" {
 resource "aws_security_group" "this" {
   name        = "ec2-sg-${random_string.this.result}"
   description = "Security group for EC2 instance - SSH access"
-  vpc_id      = var.vpc_id
+  vpc_id      = var.network.vpc_id
 
   # SSH access
   ingress {
@@ -58,7 +58,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "this" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
-  subnet_id                   = var.public_subnet_id
+  subnet_id                   = var.network.subnet_id
   key_name                    = aws_key_pair.this.key_name
   vpc_security_group_ids      = [aws_security_group.this.id]
   associate_public_ip_address = true
@@ -77,11 +77,11 @@ resource "aws_instance" "this" {
     delete_on_termination = true
   }
 
-  user_data = var.auto_shutdown_idle_minutes > 0 ? templatefile(
+  user_data = var.auto_shutdown.idle > 0 ? templatefile(
     "${path.module}/templates/auto-shutdown.sh.tftpl",
     {
-      idle_minutes  = var.auto_shutdown_idle_minutes
-      cpu_threshold = var.auto_shutdown_cpu_threshold
+      idle_minutes  = var.auto_shutdown.idle
+      cpu_threshold = var.auto_shutdown.threshold
     }
   ) : null
 }
