@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run -q --script \"$CLAUDE_PROJECT_DIR/.claude/hooks/tirith-platform-check.py\"",
+            "timeout": 900
+          }
+        ]
+      }
+    ]
+  }
+}

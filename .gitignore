@@ -43,3 +43,7 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Tirith platform hook state and plan files
+.claude/tirith-platform.state
+tfplan
