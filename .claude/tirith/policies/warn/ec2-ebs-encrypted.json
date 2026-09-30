@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "version": "v1",
+    "required_provider": "stackguardian/terraform_plan",
+    "name": "EC2 root volumes and EBS volumes must be encrypted"
+  },
+  "evaluators": [
+    {
+      "id": "root_volume_encrypted",
+      "description": "aws_instance root_block_device sets encrypted = true",
+      "provider_args": {
+        "operation_type": "attribute",
+        "terraform_resource_type": "aws_instance",
+        "terraform_resource_attribute": "root_block_device.*.encrypted"
+      },
+      "condition": { "type": "Equals", "value": true, "error_tolerance": 1 }
+    },
+    {
+      "id": "ebs_volume_encrypted",
+      "description": "aws_ebs_volume sets encrypted = true",
+      "provider_args": {
+        "operation_type": "attribute",
+        "terraform_resource_type": "aws_ebs_volume",
+        "terraform_resource_attribute": "encrypted"
+      },
+      "condition": { "type": "Equals", "value": true, "error_tolerance": 1 }
+    },
+    {
+      "id": "plan_readable",
+      "description": "Keeps the verdict pass/fail when nothing in the plan is relevant",
+      "provider_args": { "operation_type": "terraform_version" },
+      "condition": { "type": "IsNotEmpty", "error_tolerance": 0 }
+    }
+  ],
+  "eval_expression": "root_volume_encrypted && ebs_volume_encrypted && plan_readable"
+}

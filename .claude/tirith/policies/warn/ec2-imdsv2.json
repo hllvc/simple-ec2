@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "version": "v1",
+    "required_provider": "stackguardian/terraform_plan",
+    "name": "EC2 instances must require IMDSv2"
+  },
+  "evaluators": [
+    {
+      "id": "imdsv2_required",
+      "description": "aws_instance metadata_options sets http_tokens = \"required\"",
+      "provider_args": {
+        "operation_type": "attribute",
+        "terraform_resource_type": "aws_instance",
+        "terraform_resource_attribute": "metadata_options.*.http_tokens"
+      },
+      "condition": { "type": "Equals", "value": "required", "error_tolerance": 1 }
+    },
+    {
+      "id": "plan_readable",
+      "description": "Keeps the verdict pass/fail when nothing in the plan is relevant",
+      "provider_args": { "operation_type": "terraform_version" },
+      "condition": { "type": "IsNotEmpty", "error_tolerance": 0 }
+    }
+  ],
+  "eval_expression": "imdsv2_required && plan_readable"
+}

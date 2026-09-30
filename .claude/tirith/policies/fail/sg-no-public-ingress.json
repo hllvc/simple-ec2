@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "version": "v1",
+    "required_provider": "stackguardian/terraform_plan",
+    "name": "Security groups must not allow ingress from the whole internet"
+  },
+  "evaluators": [
+    {
+      "id": "sg_ingress_ipv4",
+      "description": "aws_security_group inline ingress has no 0.0.0.0/0",
+      "provider_args": {
+        "operation_type": "attribute",
+        "terraform_resource_type": "aws_security_group",
+        "terraform_resource_attribute": "ingress.*.cidr_blocks.*"
+      },
+      "condition": { "type": "NotContainedIn", "value": ["0.0.0.0/0"], "error_tolerance": 2 }
+    },
+    {
+      "id": "sg_ingress_ipv6",
+      "description": "aws_security_group inline ingress has no ::/0",
+      "provider_args": {
+        "operation_type": "attribute",
+        "terraform_resource_type": "aws_security_group",
+        "terraform_resource_attribute": "ingress.*.ipv6_cidr_blocks.*"
+      },
+      "condition": { "type": "NotContainedIn", "value": ["::/0"], "error_tolerance": 2 }
+    },
+    {
+      "id": "ingress_rule_ipv4",
+      "description": "aws_vpc_security_group_ingress_rule is not 0.0.0.0/0",
+      "provider_args": {
+        "operation_type": "attribute",
+        "terraform_resource_type": "aws_vpc_security_group_ingress_rule",
+        "terraform_resource_attribute": "cidr_ipv4"
+      },
+      "condition": { "type": "NotEquals", "value": "0.0.0.0/0", "error_tolerance": 2 }
+    },
+    {
+      "id": "ingress_rule_ipv6",
+      "description": "aws_vpc_security_group_ingress_rule is not ::/0",
+      "provider_args": {
+        "operation_type": "attribute",
+        "terraform_resource_type": "aws_vpc_security_group_ingress_rule",
+        "terraform_resource_attribute": "cidr_ipv6"
+      },
+      "condition": { "type": "NotEquals", "value": "::/0", "error_tolerance": 2 }
+    },
+    {
+      "id": "plan_readable",
+      "description": "Keeps the verdict pass/fail when nothing in the plan is relevant",
+      "provider_args": { "operation_type": "terraform_version" },
+      "condition": { "type": "IsNotEmpty", "error_tolerance": 0 }
+    }
+  ],
+  "eval_expression": "sg_ingress_ipv4 && sg_ingress_ipv6 && ingress_rule_ipv4 && ingress_rule_ipv6 && plan_readable"
+}
