@@ -9,7 +9,8 @@ resource "random_string" "this" {
 
 # Generate SSH key pair
 resource "tls_private_key" "this" {
-  algorithm = "ED25519"
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 # Create AWS key pair from generated public key
