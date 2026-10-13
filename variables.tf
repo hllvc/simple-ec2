@@ -43,3 +43,9 @@ variable "data_volume_size" {
   type        = number
   default     = 10
 }
+
+variable "root_volume_size" {
+  description = "Size in GiB of the root EBS volume"
+  type        = number
+  default     = 30
+}

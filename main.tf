@@ -37,6 +37,15 @@ resource "aws_security_group" "this" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # ICMP (ping)
+  ingress {
+    description = "ICMP echo"
+    from_port   = 8
+    to_port     = 0
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Allow all outbound traffic
   egress {
     description = "All outbound traffic"
@@ -81,7 +90,7 @@ resource "aws_instance" "this" {
 
   root_block_device {
     volume_type           = "gp3"
-    volume_size           = 20
+    volume_size           = var.root_volume_size
     delete_on_termination = true
   }
 
