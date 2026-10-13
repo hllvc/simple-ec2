@@ -31,3 +31,9 @@ variable "auto_shutdown_cpu_threshold" {
   type        = number
   default     = 5
 }
+
+variable "environment" {
+  description = "Environment name used in resource tags"
+  type        = string
+  default     = "recovery-test"
+}

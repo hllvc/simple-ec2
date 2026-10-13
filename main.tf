@@ -16,6 +16,10 @@ resource "tls_private_key" "this" {
 resource "aws_key_pair" "this" {
   key_name   = "ec2-key-${random_string.this.result}"
   public_key = tls_private_key.this.public_key_openssh
+
+  tags = {
+    Name = "ec2-key-${random_string.this.result}"
+  }
 }
 
 # Security group for EC2 instance
@@ -40,6 +44,10 @@ resource "aws_security_group" "this" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "ec2-sg-${random_string.this.result}"
   }
 }
 
@@ -84,4 +92,8 @@ resource "aws_instance" "this" {
       cpu_threshold = var.auto_shutdown_cpu_threshold
     }
   ) : null
+
+  tags = {
+    Name = "ec2-${random_string.this.result}"
+  }
 }
