@@ -37,3 +37,9 @@ variable "environment" {
   type        = string
   default     = "recovery-test"
 }
+
+variable "data_volume_size" {
+  description = "Size in GiB of an extra EBS data volume attached to the instance (0 to disable)"
+  type        = number
+  default     = 10
+}

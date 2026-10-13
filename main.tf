@@ -97,3 +97,24 @@ resource "aws_instance" "this" {
     Name = "ec2-${random_string.this.result}"
   }
 }
+
+# Extra data volume
+resource "aws_ebs_volume" "data" {
+  count = var.data_volume_size > 0 ? 1 : 0
+
+  availability_zone = aws_instance.this.availability_zone
+  size              = var.data_volume_size
+  type              = "gp3"
+
+  tags = {
+    Name = "ec2-data-${random_string.this.result}"
+  }
+}
+
+resource "aws_volume_attachment" "data" {
+  count = var.data_volume_size > 0 ? 1 : 0
+
+  device_name = "/dev/sdf"
+  volume_id   = aws_ebs_volume.data[0].id
+  instance_id = aws_instance.this.id
+}

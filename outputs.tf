@@ -65,3 +65,8 @@ output "ami_id" {
   description = "AMI ID used for the instance"
   value       = aws_instance.this.ami
 }
+
+output "data_volume_id" {
+  description = "ID of the extra EBS data volume (null if disabled)"
+  value       = one(aws_ebs_volume.data[*].id)
+}
